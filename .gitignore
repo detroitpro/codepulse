@@ -30,3 +30,6 @@ build/
 .idea/
 .vscode/
 *.swp
+
+# here.now local publish state
+.herenow/

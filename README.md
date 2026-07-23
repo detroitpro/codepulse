@@ -4,7 +4,7 @@ Adaptive **runtime intelligence** for AI coding agents: live behavioral model + 
 
 > **Status: design phase.** Docs and stubs only — no live instrumentation yet.
 
-**Site:** [detroitpro.github.io/codepulse](https://detroitpro.github.io/codepulse/) (static landing in [`site/`](site/), deployed via GitHub Actions)
+**Site:** [detroitpro.github.io/codepulse](https://detroitpro.github.io/codepulse/) · [alpine-realm-ney2.here.now](https://alpine-realm-ney2.here.now/) (static landing in [`site/`](site/))
 
 ## Why
 
