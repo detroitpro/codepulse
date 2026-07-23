@@ -89,6 +89,8 @@ Language coverage tracks the **indexer grammar matrix** (Python first). When a n
 
 Pattern language is codepulse-owned (metavariables `$NAME` / `$$$ARGS`, ast-grep-*like* ergonomics, not ast-grep wire-compatible). No external `ast-grep` CLI.
 
+Example asks (“find async defs”, “where is `requests.get`?”, “bare `except:`”, …) and mapped patterns live in [MCP_API.md](MCP_API.md#structural_search).
+
 ## Trust and overhead model
 
 - **Budget owner:** controller (max probes, max events/sec, max window duration).

@@ -113,6 +113,25 @@ inspired by ast-grep; not wire-compatible with ast-grep).
 
 **Non-goals (v1):** rewrite/codemod, YAML multi-rule packs, lint autofix.
 
+#### Example questions → patterns (Python)
+
+Natural-language asks agents (or humans) can make; the host maps them to `structural_search`:
+
+| Question | Example pattern |
+|---|---|
+| Find all async function definitions | `async def $NAME($$$ARGS): $$$BODY` |
+| Find bare `except:` clauses | `except: $$$BODY` |
+| Find `print(...)` calls (any arity) | `print($$$ARGS)` |
+| Find calls to `requests.get(...)` | `requests.get($$$ARGS)` |
+| Find `open(...)` without a context manager nearby (shape hunt) | `open($$$ARGS)` |
+| Find class methods named `execute` | `def execute($$$ARGS): $$$BODY` |
+| Find `@app.route` / decorator + function pairs | `@$DECORATOR\ndef $NAME($$$ARGS): $$$BODY` |
+| Find `raise` of a specific exception type | `raise HTTPException($$$ARGS)` |
+| Find `await` of a named call | `await $FUNC($$$ARGS)` |
+| Find assignments to a settings-like name | `$NAME = os.environ[$KEY]` |
+
+Typical follow-up with runtime tools: take a match’s `path` / inferred qualname → `get_function_runtime_summary` or `get_hot_paths` to see whether that shape actually ran.
+
 ### `compare_static_vs_runtime`
 
 **Input:** symbol identity (or path prefix).

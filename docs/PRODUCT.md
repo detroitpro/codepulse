@@ -33,8 +33,17 @@ Profilers and APM tools answer parts of this for humans staring at dashboards. T
 1. As an agent, I can get a **runtime summary** for a function without reading megabytes of traces.
 2. As an agent, I can deepen instrumentation on a **small target set** when baseline data is insufficient.
 3. As an agent, I can compare **static vs observed** structure (declared callees vs real edges).
-4. As an agent (or human via MCP), I can run **structural searches** — e.g. find async functions or call shapes — without installing a separate AST tool.
+4. As an agent (or human via MCP), I can run **structural searches** without installing a separate AST tool — for example:
+   - “Find all async defs in this package”
+   - “Where do we call `requests.get`?”
+   - “Show bare `except:` clauses”
+   - “Find `open(...)` call sites”
+   - “Locate methods named `execute`”
+   - “Find `await` of a specific helper”
+   Then join matches to runtime evidence (`get_hot_paths`, callers, probes).
 5. As a developer, I can enable codepulse on a Python app with **bounded overhead** and no SaaS requirement.
+
+See [MCP_API.md](MCP_API.md) for pattern examples mapped from these questions.
 
 ## Competitive wedge
 

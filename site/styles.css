@@ -361,12 +361,44 @@ code {
 .section-alt .section-head,
 .section-alt .flow,
 .section-alt .principles,
-.section-alt .stack-line {
+.section-alt .stack-line,
+.section-alt .example-asks,
+.section-alt .tools {
   max-width: var(--max);
   margin-left: auto;
   margin-right: auto;
   padding-left: clamp(1.25rem, 4vw, 2rem);
   padding-right: clamp(1.25rem, 4vw, 2rem);
+}
+
+.example-asks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+.example-asks li {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1.15rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.example-asks .ask {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.example-asks code {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: var(--signal);
+  word-break: break-word;
 }
 
 .section-head {

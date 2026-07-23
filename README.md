@@ -10,6 +10,8 @@ Adaptive **runtime intelligence** for AI coding agents: live behavioral model + 
 
 Agents today mostly see source text. codepulse adds *what actually runs*: call counts, hot paths, observed edges, joined with AST-derived complexity — plus **structural pattern search** via the tree-sitter indexer (ast-grep-like questions over MCP, no separate tool) — with an **adaptive probe controller** so exact instrumentation is time-boxed and budgeted.
 
+Example structural asks: “find all async defs”, “where is `requests.get` called?”, “show bare `except:`”, “find `open(...)` sites”, “locate `execute` methods” — then join to runtime tools. Pattern table: [docs/MCP_API.md](docs/MCP_API.md#structural_search).
+
 ## Stack
 
 | Piece | Choice |

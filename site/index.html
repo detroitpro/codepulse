@@ -25,6 +25,7 @@
       <a class="top-brand" href="#top">codepulse</a>
       <nav class="top-nav" aria-label="Primary">
         <a href="#capabilities">Capabilities</a>
+        <a href="#patterns">Patterns</a>
         <a href="#how">How it works</a>
         <a href="#mcp">MCP</a>
         <a href="https://github.com/detroitpro/codepulse">GitHub</a>
@@ -125,7 +126,51 @@
         </ul>
       </section>
 
-      <section class="section section-alt" id="how">
+      <section class="section section-alt" id="patterns">
+        <div class="section-head">
+          <h2>Structural search questions</h2>
+          <p>
+            Ask shape questions over the workspace with <code>structural_search</code>, then
+            join matches to live hot paths and callers.
+          </p>
+        </div>
+        <ul class="example-asks">
+          <li>
+            <p class="ask">Find all async function definitions</p>
+            <code>async def $NAME($$$ARGS): $$$BODY</code>
+          </li>
+          <li>
+            <p class="ask">Where do we call <code>requests.get</code>?</p>
+            <code>requests.get($$$ARGS)</code>
+          </li>
+          <li>
+            <p class="ask">Show bare <code>except:</code> clauses</p>
+            <code>except: $$$BODY</code>
+          </li>
+          <li>
+            <p class="ask">Find every <code>open(...)</code> call site</p>
+            <code>open($$$ARGS)</code>
+          </li>
+          <li>
+            <p class="ask">Locate methods named <code>execute</code></p>
+            <code>def execute($$$ARGS): $$$BODY</code>
+          </li>
+          <li>
+            <p class="ask">Find <code>await</code> of a named call</p>
+            <code>await $FUNC($$$ARGS)</code>
+          </li>
+          <li>
+            <p class="ask">Find <code>raise HTTPException(...)</code></p>
+            <code>raise HTTPException($$$ARGS)</code>
+          </li>
+          <li>
+            <p class="ask">Find decorator + function pairs</p>
+            <code>@$DECORATOR def $NAME($$$ARGS): $$$BODY</code>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" id="how">
         <div class="section-head">
           <h2>How it works</h2>
           <p>One local daemon. Runtime agents as plugins. MCP for the AI host.</p>
@@ -176,7 +221,7 @@
         </ol>
       </section>
 
-      <section class="section" id="mcp">
+      <section class="section section-alt" id="mcp">
         <div class="section-head">
           <h2>MCP tool surface</h2>
           <p>TypeScript server talking to the local daemon. Designed for agent workflows.</p>
@@ -217,7 +262,7 @@
         </dl>
       </section>
 
-      <section class="section section-alt" id="principles">
+      <section class="section" id="principles">
         <div class="section-head">
           <h2>Built for agents, not dashboards</h2>
           <p>Local-first. Privacy fail-closed. Platform language independent of the target runtime.</p>
