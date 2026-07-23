@@ -25,6 +25,11 @@ build/
 *.sqlite3
 .codepulse/
 
+# .NET
+**/bin/
+**/obj/
+*.user
+
 # OS / editor
 .DS_Store
 .idea/

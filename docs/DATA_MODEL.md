@@ -17,7 +17,9 @@ Local-first SQLite store. Conceptual schema for Phase 1+.
 Rules:
 
 - `path` is repo-relative, POSIX separators, normalized.
-- `qualname` is language-specific but stable (Python: dotted qualname from module/class/function nesting).
+- `qualname` is language-specific but stable:
+  - **Python:** dotted qualname from module/class/function nesting (`PricingWorkflow.execute`)
+  - **C#:** `Namespace.Type.Method` (e.g. `DotnetDemo.PricingWorkflow.Execute`)
 - Nested / lambdas: include disambiguator when needed (`fn.<locals>.helper`).
 - Never use raw pointer / code object id as durable key.
 

@@ -8,7 +8,7 @@
 | Static parsing + structural search | **tree-sitter** (Python grammar first) | Symbol index and on-demand AST pattern match in-process; no `ast-grep` dependency |
 | MCP server | **TypeScript (Node ≥20)** | Best MCP ecosystem fit for Cursor / Claude Code |
 | Wire protocol | Versioned JSON over HTTP or Unix socket | Language-agnostic |
-| First runtime agent | **Python ≥3.12** | Required only to instrument CPython |
+| Runtime agents | **Python ≥3.12**, **.NET (Harmony)** | Plugins; platform stays Rust + TS |
 
 Target runtime does **not** choose the platform language. Agents are plugins.
 

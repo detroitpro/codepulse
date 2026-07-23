@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CodePulse.Agent.Tests/CodePulse.Agent.Tests.csproj" />
+  <Project Path="CodePulse.Agent/CodePulse.Agent.csproj" />
+</Solution>

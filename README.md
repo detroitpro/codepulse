@@ -2,7 +2,7 @@
 
 Adaptive **runtime intelligence** for AI coding agents: live behavioral model + static structure (including indexer-backed structural search), queried through a compact MCP surface.
 
-> **Status: design phase.** Docs and stubs only — no live instrumentation yet.
+> **Status:** implementable MVP — Rust daemon, MCP server, Python + .NET agents, demos and E2E scripts.
 
 **Site:** [detroitpro.github.io/codepulse](https://detroitpro.github.io/codepulse/) · [alpine-realm-ney2.here.now](https://alpine-realm-ney2.here.now/) (static landing in [`site/`](site/))
 
@@ -16,12 +16,37 @@ Example structural asks: “find all async defs”, “where is `requests.get` c
 
 | Piece | Choice |
 |---|---|
-| Core (ingest, store, controller, indexer) | Rust |
-| Static parsing + structural search | tree-sitter indexer (Python grammar first) |
-| MCP server | TypeScript |
-| First runtime agent | Python ≥3.12 (`agents/python`) |
+| Core (ingest, store, controller, indexer) | Rust (axum + SQLite) |
+| Static parsing + structural search | tree-sitter (Python + C#) |
+| MCP server | TypeScript (`@modelcontextprotocol/sdk`) |
+| Runtime agents | Python ≥3.12 (`sys.monitoring`) · .NET (`Lib.Harmony`) |
 
 The platform language is **not** dictated by the target runtime. Runtime agents are plugins that speak a shared [agent protocol](docs/AGENT_PROTOCOL.md).
+
+## Quickstart
+
+```bash
+# 1) Daemon (indexes --root, listens on :7420)
+cargo run -p codepulse-daemon -- --root examples/python-demo --db .codepulse/dev.db
+
+# 2) MCP server (another terminal)
+cd packages/mcp && npm install && npm run dev
+# point your AI host at this stdio server; CODEPULSE_ENDPOINT=http://127.0.0.1:7420
+
+# 3) Python demo under the agent
+pip install -e "agents/python[dev]"
+CODEPULSE_ROOT=$PWD/examples/python-demo CODEPULSE_ENDPOINT=http://127.0.0.1:7420 \
+  python -c "from codepulse_agent import install; install(); import uvicorn; from app import app" \
+  # or use scripts/e2e-python.sh
+```
+
+E2E:
+
+```bash
+chmod +x scripts/*.sh examples/dotnet-demo/scenario.sh
+./scripts/e2e-python.sh
+./scripts/e2e-dotnet.sh
+```
 
 ## Repo layout
 
@@ -30,8 +55,11 @@ codepulse/
   docs/                 Product & architecture design
   site/                 Landing page (GitHub Pages)
   crates/               Rust workspace (daemon + libraries)
-  packages/mcp/         TypeScript MCP server stub
-  agents/python/        CPython agent stub
+  packages/mcp/         TypeScript MCP server
+  agents/python/        CPython agent
+  agents/dotnet/        .NET agent (Harmony)
+  examples/             python-demo + dotnet-demo
+  scripts/              e2e-python.sh / e2e-dotnet.sh
 ```
 
 ## Docs
@@ -44,19 +72,6 @@ codepulse/
 | [docs/MCP_API.md](docs/MCP_API.md) | Tool contracts |
 | [docs/AGENT_PROTOCOL.md](docs/AGENT_PROTOCOL.md) | Agent ↔ daemon wire contract |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phase 0–3 |
-
-## Quick stubs
-
-```bash
-# Rust daemon stub
-cargo run -p codepulse-daemon
-
-# MCP stub
-cd packages/mcp && npm install && npm run dev
-
-# Python agent stub
-cd agents/python && python -m codepulse_agent
-```
 
 ## Principles
 

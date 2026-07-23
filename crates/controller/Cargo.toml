@@ -7,5 +7,9 @@ description = "Adaptive probe controller — budgeted, time-boxed instrumentatio
 
 [dependencies]
 codepulse-protocol = { workspace = true }
+codepulse-store = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
+uuid = { workspace = true }
+parking_lot = { workspace = true }

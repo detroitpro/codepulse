@@ -3,9 +3,19 @@ name = "codepulse-indexer"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Static indexer powered by tree-sitter (Python grammar first)"
+description = "Static indexer powered by tree-sitter (Python + C#)"
 
 [dependencies]
 codepulse-protocol = { workspace = true }
+codepulse-store = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
+tree-sitter = { workspace = true }
+tree-sitter-python = { workspace = true }
+tree-sitter-c-sharp = { workspace = true }
+walkdir = { workspace = true }
+streaming-iterator = "0.1"
+
+[dev-dependencies]
+tempfile = "3"

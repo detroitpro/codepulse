@@ -1,8 +1,14 @@
 # Agent protocol
 
 Language-agnostic contract between **runtime agents** and the **Rust daemon**.
-The Python agent (`agents/python`) is the first implementer. Future `agents/node`,
-`agents/dotnet`, etc. must speak the same protocol.
+Implementers:
+
+| Agent | Path | Notes |
+|---|---|---|
+| Python ≥3.12 | `agents/python` | `sys.monitoring`; language = `python` |
+| .NET (net8+) | `agents/dotnet` | Lib.Harmony method patching; language = `csharp`; scope via `CODEPULSE_INCLUDE` |
+
+Future agents (e.g. Node) must speak the same protocol.
 
 Protocol version: **1** (`PROTOCOL_VERSION` in `crates/protocol`).
 

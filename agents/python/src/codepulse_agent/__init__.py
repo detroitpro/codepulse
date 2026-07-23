@@ -1,3 +1,5 @@
-"""codepulse CPython agent (stub)."""
+"""codepulse in-process agent for CPython."""
 
-__version__ = "0.1.0"
+from .agent import install
+
+__all__ = ["install"]
