@@ -1,0 +1,11 @@
+[package]
+name = "codepulse-indexer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Static indexer powered by tree-sitter (Python grammar first)"
+
+[dependencies]
+codepulse-protocol = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }

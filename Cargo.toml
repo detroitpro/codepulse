@@ -1,0 +1,27 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/protocol",
+    "crates/ingest",
+    "crates/store",
+    "crates/controller",
+    "crates/indexer",
+    "crates/daemon",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/example/codepulse"
+
+[workspace.dependencies]
+codepulse-protocol = { path = "crates/protocol" }
+codepulse-ingest = { path = "crates/ingest" }
+codepulse-store = { path = "crates/store" }
+codepulse-controller = { path = "crates/controller" }
+codepulse-indexer = { path = "crates/indexer" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+anyhow = "1"

@@ -1,0 +1,219 @@
+:root {
+  --ink: #12161c;
+  --ink-soft: #3a4452;
+  --paper: #f2f4f6;
+  --paper-deep: #e4e9ee;
+  --signal: #0d8a78;
+  --signal-bright: #12b39a;
+  --line: rgba(18, 22, 28, 0.12);
+  --font-display: "Syne", sans-serif;
+  --font-body: "IBM Plex Sans", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.stage {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  overflow: hidden;
+}
+
+.trace {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 80% 20%, rgba(13, 138, 120, 0.14), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 10% 80%, rgba(18, 22, 28, 0.06), transparent 50%),
+    linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+}
+
+.trace::before,
+.trace::after {
+  content: "";
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--signal) 35%,
+    transparent 70%
+  );
+  opacity: 0.35;
+  animation: drift 14s linear infinite;
+}
+
+.trace::before {
+  top: 32%;
+  transform: rotate(-6deg);
+}
+
+.trace::after {
+  top: 68%;
+  opacity: 0.22;
+  animation-duration: 18s;
+  animation-direction: reverse;
+  transform: rotate(4deg);
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(-6%) rotate(-6deg);
+  }
+  to {
+    transform: translateX(6%) rotate(-6deg);
+  }
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  width: min(40rem, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 8vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  margin: 0;
+}
+
+.pulse {
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 0 0 rgba(13, 138, 120, 0.45);
+  animation: pulse 2.4s ease-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(13, 138, 120, 0.45);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 14px rgba(13, 138, 120, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(13, 138, 120, 0);
+  }
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+  max-width: 22ch;
+}
+
+.lede {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  max-width: 36ch;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.15rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease,
+    color 160ms ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-primary:hover {
+  background: var(--signal);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.btn-ghost:hover {
+  border-color: var(--signal);
+  color: var(--signal);
+  transform: translateY(-1px);
+}
+
+.status {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+  max-width: 40ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse,
+  .trace::before,
+  .trace::after,
+  .btn {
+    animation: none;
+    transition: none;
+  }
+}

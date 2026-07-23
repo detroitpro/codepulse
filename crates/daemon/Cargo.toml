@@ -1,0 +1,18 @@
+[package]
+name = "codepulse-daemon"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Local codepulse daemon — hosts ingest, store, controller, indexer APIs"
+
+[[bin]]
+name = "codepulse"
+path = "src/main.rs"
+
+[dependencies]
+codepulse-protocol = { workspace = true }
+codepulse-ingest = { workspace = true }
+codepulse-store = { workspace = true }
+codepulse-controller = { workspace = true }
+codepulse-indexer = { workspace = true }
+anyhow = { workspace = true }

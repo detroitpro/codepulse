@@ -1,0 +1,11 @@
+[package]
+name = "codepulse-controller"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Adaptive probe controller — budgeted, time-boxed instrumentation"
+
+[dependencies]
+codepulse-protocol = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
