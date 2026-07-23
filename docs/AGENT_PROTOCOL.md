@@ -133,3 +133,10 @@ Agent acknowledges enable/disable or budget breach.
 
 Default payload fields are counts, durations, and symbol identities only.
 Forbidden without explicit future protocol + user opt-in: arguments, return values, locals, secrets, raw SQL with literals.
+
+## Out of scope for this protocol
+
+**Structural search** (`structural_search` MCP tool) is implemented in the Rust tree-sitter
+indexer and served via daemon local RPC to MCP. It is **not** part of the runtime agent
+wire contract — agents do not receive pattern-search requests and do not parse workspace AST
+for this feature. See [MCP_API.md](MCP_API.md) and [ARCHITECTURE.md](ARCHITECTURE.md).

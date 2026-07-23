@@ -65,6 +65,54 @@ Return observed runtime stats for a symbol.
 
 **Output:** complexity, param_count, lines, syntactic_callee_count, kind.
 
+### `structural_search`
+
+On-demand AST pattern match over the workspace via the Rust tree-sitter indexer.
+No `ast-grep` dependency. Pattern language is **codepulse-owned** (metavariable style
+inspired by ast-grep; not wire-compatible with ast-grep).
+
+**Input**
+
+```json
+{
+  "language": "python",
+  "pattern": "async def $NAME($$$ARGS):\n    $$$BODY",
+  "path_prefix": "optional/repo/relative",
+  "limit": 50
+}
+```
+
+| Field | Notes |
+|---|---|
+| `language` | Selects the tree-sitter grammar (Python first; expands with indexer grammars) |
+| `pattern` | Code snippet with metavariables: `$NAME` = one node, `$$$ARGS` = node list |
+| `path_prefix` | Optional repo-relative scope; default = workspace root |
+| `limit` | Max matches (hard-capped server-side; default 50) |
+
+**Output**
+
+```json
+{
+  "language": "python",
+  "match_count": 2,
+  "truncated": false,
+  "matches": [
+    {
+      "path": "src/app/api.py",
+      "start_line": 40,
+      "end_line": 52,
+      "matched_text": "async def handle_checkout(...):\n    ..."
+    }
+  ]
+}
+```
+
+`matched_text` is truncated. Payload stays compact (answers over streams).
+
+**Errors (structured):** unsupported language, invalid pattern, indexer not ready.
+
+**Non-goals (v1):** rewrite/codemod, YAML multi-rule packs, lint autofix.
+
 ### `compare_static_vs_runtime`
 
 **Input:** symbol identity (or path prefix).
@@ -116,14 +164,16 @@ Symbols that are statically notable (e.g. complexity ≥ N) but have **zero** ru
 
 ## Example agent workflow
 
-1. `get_hot_paths` → find suspects.
-2. `get_actual_callers` on a suspect → understand fan-in.
-3. `compare_static_vs_runtime` → see dynamic vs declared.
-4. If edges are thin: `enable_targeted_instrumentation` for 30s while reproducing.
-5. Re-query summaries; propose a code change with evidence.
+1. `structural_search` → find candidate shapes in source (e.g. async handlers without a try).
+2. `get_hot_paths` → see which of those (or nearby) actually ran.
+3. `get_actual_callers` on a suspect → understand fan-in.
+4. `compare_static_vs_runtime` → see dynamic vs declared.
+5. If edges are thin: `enable_targeted_instrumentation` for 30s while reproducing.
+6. Re-query summaries; propose a code change with evidence.
 
 ## Non-goals for MCP responses
 
 - Streaming individual call events to the model
 - Dumping full SQL/HTTP payloads
 - Returning argument or return values
+- Full-file dumps from `structural_search` (matches are capped and truncated)

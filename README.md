@@ -1,6 +1,6 @@
 # codepulse
 
-Adaptive **runtime intelligence** for AI coding agents: live behavioral model + static structure, queried through a compact MCP surface.
+Adaptive **runtime intelligence** for AI coding agents: live behavioral model + static structure (including indexer-backed structural search), queried through a compact MCP surface.
 
 > **Status: design phase.** Docs and stubs only — no live instrumentation yet.
 
@@ -8,14 +8,14 @@ Adaptive **runtime intelligence** for AI coding agents: live behavioral model + 
 
 ## Why
 
-Agents today mostly see source text. codepulse adds *what actually runs*: call counts, hot paths, observed edges, joined with AST-derived complexity — with an **adaptive probe controller** so exact instrumentation is time-boxed and budgeted.
+Agents today mostly see source text. codepulse adds *what actually runs*: call counts, hot paths, observed edges, joined with AST-derived complexity — plus **structural pattern search** via the tree-sitter indexer (ast-grep-like questions over MCP, no separate tool) — with an **adaptive probe controller** so exact instrumentation is time-boxed and budgeted.
 
 ## Stack
 
 | Piece | Choice |
 |---|---|
 | Core (ingest, store, controller, indexer) | Rust |
-| Static parsing | tree-sitter (Python grammar first) |
+| Static parsing + structural search | tree-sitter indexer (Python grammar first) |
 | MCP server | TypeScript |
 | First runtime agent | Python ≥3.12 (`agents/python`) |
 
@@ -60,10 +60,10 @@ cd agents/python && python -m codepulse_agent
 
 1. Answers over streams  
 2. Adaptive cost  
-3. Static + dynamic together  
+3. Static + dynamic together (catalog + structural search in the indexer)  
 4. Local-first  
 5. Fail closed on privacy  
-6. Runtime agents are plugins  
+6. Runtime agents are plugins (pattern search is not on the agent wire)  
 
 ## License
 

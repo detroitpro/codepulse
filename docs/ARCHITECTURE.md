@@ -5,7 +5,7 @@
 | Layer | Technology | Rationale |
 |---|---|---|
 | Store, ingest, aggregation, probe controller, indexer | **Rust** | Throughput, low overhead, single binary, tree-sitter embedding |
-| Static parsing | **tree-sitter** (Python grammar first) | Fast, multi-language-ready without rewriting the indexer |
+| Static parsing + structural search | **tree-sitter** (Python grammar first) | Symbol index and on-demand AST pattern match in-process; no `ast-grep` dependency |
 | MCP server | **TypeScript (Node ≥20)** | Best MCP ecosystem fit for Cursor / Claude Code |
 | Wire protocol | Versioned JSON over HTTP or Unix socket | Language-agnostic |
 | First runtime agent | **Python ≥3.12** | Required only to instrument CPython |
@@ -38,6 +38,7 @@ flowchart TB
   Indexer --> Store
   MCP -->|local RPC| Store
   MCP --> Controller
+  MCP -->|structural_search| Indexer
   AI --> MCP
 ```
 
@@ -49,7 +50,7 @@ flowchart TB
 | `crates/ingest` | Validate + accept aggregated agent batches |
 | `crates/store` | SQLite intelligence store |
 | `crates/controller` | Adaptive probe windows and budgets |
-| `crates/indexer` | Walk roots, extract symbols via tree-sitter |
+| `crates/indexer` | Walk roots, extract symbols, and run on-demand structural pattern match via tree-sitter |
 | `crates/daemon` | Binary that hosts local APIs |
 | `packages/mcp` | MCP tool surface for AI agents |
 | `agents/python` | CPython in-process agent (first implementer of agent protocol) |
@@ -77,6 +78,17 @@ flowchart TB
 2. Symbols and syntactic edges land in `symbols` (+ optional static edge table).
 3. Query layer joins static identity to runtime stats by normalized `SymbolId`.
 
+### Structural search (on demand)
+
+1. AI or human calls MCP `structural_search` with a language + codepulse pattern.
+2. MCP → daemon local RPC → `crates/indexer` (same channel family as store reads).
+3. Indexer parses the pattern against the selected tree-sitter grammar and scans the workspace (or `path_prefix`).
+4. Returns a capped list of matches (`path`, line range, truncated `matched_text`).
+
+Language coverage tracks the **indexer grammar matrix** (Python first). When a new runtime-agent language ships, its grammar and structural search land in the indexer — **not** inside `agents/<lang>`. Runtime agents stay ingest/probe only.
+
+Pattern language is codepulse-owned (metavariables `$NAME` / `$$$ARGS`, ast-grep-*like* ergonomics, not ast-grep wire-compatible). No external `ast-grep` CLI.
+
 ## Trust and overhead model
 
 - **Budget owner:** controller (max probes, max events/sec, max window duration).
@@ -91,6 +103,8 @@ flowchart TB
 | Daemon down | Agent buffers briefly then drops with counter; no crash of host app |
 | Protocol mismatch | Ingest rejects batch; agent logs and continues baseline if possible |
 | Indexer parse error | Skip file; record error; do not fail whole index |
+| Structural search bad pattern | Indexer returns structured error to MCP; no partial silent results |
+| Unsupported search language | MCP/indexer returns structured error (grammar not loaded) |
 | Probe target unknown | Controller returns structured error to MCP; no partial silent enable |
 | Store disk full | Ingest returns 507-equivalent; agent sheds load |
 

@@ -60,10 +60,12 @@
               <span></span><span></span><span></span>
               <em>agent ↔ codepulse</em>
             </div>
-            <pre class="console-body"><code><span class="tok-dim">›</span> get_hot_paths(metric=<span class="tok-str">"invocations"</span>)
+            <pre class="console-body"><code><span class="tok-dim">›</span> structural_search(<span class="tok-str">"async def $NAME($$$):"</span>)
+<span class="tok-ok">←</span> <span class="tok-num">12</span> matches · api.py:40, …
+
+<span class="tok-dim">›</span> get_hot_paths(metric=<span class="tok-str">"invocations"</span>)
 <span class="tok-ok">←</span> PricingWorkflow.execute   <span class="tok-num">148 221</span>
 <span class="tok-ok">←</span> api.handle_checkout        <span class="tok-num">90 014</span>
-<span class="tok-ok">←</span> inventory.reserve          <span class="tok-num">61 882</span>
 
 <span class="tok-dim">›</span> get_actual_callers(<span class="tok-str">"…execute"</span>)
 <span class="tok-ok">←</span> 6 callers · top: handle_checkout
@@ -80,7 +82,8 @@
           <p>
             Coding agents reason from files and symbols. Real systems also have hot paths,
             observed callers, failure concentration, and dead complexity. codepulse turns that
-            runtime truth into something agents can ask for.
+            runtime truth — and structural pattern questions over the AST — into something
+            agents can ask for over one MCP surface.
           </p>
         </div>
       </section>
@@ -106,6 +109,10 @@
           <li>
             <strong>Adaptive deepen</strong>
             <span>Time-boxed exact instrumentation on a small target set when baseline is thin.</span>
+          </li>
+          <li>
+            <strong>Structural pattern search</strong>
+            <span>Ask ast-grep-style questions over the workspace via the tree-sitter indexer — no separate tool.</span>
           </li>
           <li>
             <strong>Uncovered complexity</strong>
@@ -137,10 +144,11 @@
           <li>
             <span class="flow-step">02</span>
             <div>
-              <strong>Static index</strong>
+              <strong>Static index + patterns</strong>
               <p>
-                tree-sitter walks the project, extracts symbols and complexity, and joins them
-                to runtime identity by normalized <code>SymbolId</code>.
+                tree-sitter walks the project, extracts symbols and complexity, joins them to
+                runtime identity by <code>SymbolId</code>, and answers on-demand
+                <code>structural_search</code> patterns — no <code>ast-grep</code> CLI.
               </p>
             </div>
           </li>
@@ -150,8 +158,8 @@
               <strong>MCP answers</strong>
               <p>
                 Cursor, Claude Code, and other hosts call tools like
-                <code>get_function_runtime_summary</code> and <code>get_hot_paths</code> —
-                summaries only.
+                <code>structural_search</code>, <code>get_hot_paths</code>, and
+                <code>get_function_runtime_summary</code> — compact answers only.
               </p>
             </div>
           </li>
@@ -174,6 +182,10 @@
           <p>TypeScript server talking to the local daemon. Designed for agent workflows.</p>
         </div>
         <dl class="tools">
+          <div>
+            <dt><code>structural_search</code></dt>
+            <dd>AST pattern match over the workspace (metavariables, capped matches).</dd>
+          </div>
           <div>
             <dt><code>get_hot_paths</code></dt>
             <dd>Ranked hotspots by invocations, duration, or exceptions.</dd>
@@ -213,7 +225,7 @@
         <ul class="principles">
           <li><strong>Answers over streams</strong> — summaries fit model context.</li>
           <li><strong>Adaptive cost</strong> — overhead is a controller-owned budget.</li>
-          <li><strong>Static + dynamic together</strong> — neither alone is enough.</li>
+          <li><strong>Static + dynamic together</strong> — catalog, pattern search, and live stats.</li>
           <li><strong>Local-first</strong> — works offline in your repo; no SaaS required.</li>
           <li><strong>Fail closed on privacy</strong> — no args, returns, or locals by default.</li>
           <li><strong>Runtime agents are plugins</strong> — Python first; protocol-ready for more.</li>
