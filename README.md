@@ -52,8 +52,9 @@ chmod +x scripts/*.sh examples/dotnet-demo/scenario.sh
 
 ```
 codepulse/
-  docs/                 Product & architecture design
-  site/                 Landing page (GitHub Pages)
+  docs/                 Design docs + user guide (docs/guide/)
+  site/                 Landing + static user docs (GitHub Pages)
+  skills/codepulse/     Agent Skill (SKILL.md)
   crates/               Rust workspace (daemon + libraries)
   packages/mcp/         TypeScript MCP server
   agents/python/        CPython agent
@@ -62,7 +63,21 @@ codepulse/
   scripts/              e2e-python.sh / e2e-dotnet.sh
 ```
 
+**Agent Skill:** [`skills/codepulse`](skills/codepulse) — teach agents when to use runtime tools and how to set up the stack.
+
 ## Docs
+
+### User guide
+
+| Doc | Contents |
+|---|---|
+| [docs/guide/GETTING_STARTED.md](docs/guide/GETTING_STARTED.md) | Clone, daemon, Python demo, MCP, first hot paths |
+| [docs/guide/ADVANCED.md](docs/guide/ADVANCED.md) | Structural search, probes, .NET, env, troubleshooting |
+| [docs/guide/AGENTS.md](docs/guide/AGENTS.md) | MCP config, tool map, copy-paste bootstrap prompt |
+
+Site: [Getting started](https://detroitpro.github.io/codepulse/docs/getting-started.html) · [Advanced](https://detroitpro.github.io/codepulse/docs/advanced.html) · [Agents](https://detroitpro.github.io/codepulse/docs/agents.html)
+
+### Design
 
 | Doc | Contents |
 |---|---|

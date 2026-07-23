@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced — codepulse</title>
+    <meta
+      name="description"
+      content="Structural search, probe windows, .NET agent, env vars, and troubleshooting."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true">
+      <div class="trace"></div>
+    </div>
+
+    <header class="top">
+      <a class="top-brand" href="../index.html">codepulse</a>
+      <nav class="top-nav" aria-label="Primary">
+        <a href="getting-started.html">Getting started</a>
+        <a href="advanced.html" aria-current="page">Advanced</a>
+        <a href="agents.html">Agents</a>
+        <a href="https://github.com/detroitpro/codepulse">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="doc">
+      <header class="doc-hero">
+        <p class="doc-kicker">User guide</p>
+        <h1>Advanced</h1>
+        <p class="doc-lede">Power-user patterns beyond the Python demo.</p>
+      </header>
+
+      <article class="doc-body">
+        <h2>Structural search</h2>
+        <p>
+          Indexer-backed AST patterns (no <code>ast-grep</code> CLI). Via MCP
+          <code>structural_search</code> or:
+        </p>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="adv-struct">Copy</button>
+          <pre id="adv-struct"><code>curl -s -X POST http://127.0.0.1:7420/v1/query/structural-search \
+  -H 'content-type: application/json' \
+  -d '{"language":"python","pattern":"async def $NAME($$$ARGS): $$$BODY","limit":20}'</code></pre>
+        </div>
+        <p>
+          Pattern table:
+          <a href="https://github.com/detroitpro/codepulse/blob/main/docs/MCP_API.md#structural_search"
+            >MCP_API.md</a
+          >. After matches, join to runtime with <code>get_hot_paths</code>,
+          <code>get_actual_callers</code>, <code>get_function_runtime_summary</code>.
+        </p>
+
+        <h2>Adaptive probe windows</h2>
+        <ol>
+          <li>
+            MCP <code>enable_targeted_instrumentation</code> with symbol targets +
+            <code>duration_s</code> (e.g. 30)
+          </li>
+          <li>Reproduce the workload while the window is active</li>
+          <li>Re-query callers / summaries</li>
+        </ol>
+        <p>
+          Agents poll <code>GET /v1/probe-commands</code> and ack; the controller owns budgets
+          (max 32 targets, 50k events/s).
+        </p>
+
+        <h2>.NET agent</h2>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="adv-dotnet">Copy</button>
+          <pre id="adv-dotnet"><code># Terminal 1 — daemon on the .NET demo
+./target/debug/codepulse \
+  --root examples/dotnet-demo \
+  --db .codepulse/dotnet.db \
+  --listen 127.0.0.1:7421
+
+# Terminal 2 — demo
+export CODEPULSE_ENDPOINT=http://127.0.0.1:7421
+export CODEPULSE_SESSION_ID=dotnet_demo
+export CODEPULSE_INCLUDE=DotnetDemo
+export CODEPULSE_ROOT="$PWD/examples/dotnet-demo"
+cd examples/dotnet-demo && dotnet run --urls http://127.0.0.1:8010
+
+# Terminal 3 — load
+./examples/dotnet-demo/scenario.sh</code></pre>
+        </div>
+        <p>
+          Or <code>./scripts/e2e-dotnet.sh</code>. In your app: call
+          <code>CodePulseAgent.Install("Your.Namespace")</code> early; set
+          <code>CODEPULSE_INCLUDE</code> to match.
+        </p>
+
+        <h2>Point the daemon at your project</h2>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="adv-root">Copy</button>
+          <pre id="adv-root"><code>./target/debug/codepulse \
+  --root /path/to/your/app \
+  --db .codepulse/myapp.db \
+  --listen 127.0.0.1:7420</code></pre>
+        </div>
+        <p>
+          Set <code>CODEPULSE_ROOT</code> to the same root. Reindex:
+          <code>curl -X POST http://127.0.0.1:7420/v1/reindex</code>
+        </p>
+
+        <h2>Environment variables</h2>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Used by</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>CODEPULSE_ENDPOINT</code></td>
+                <td>agents, MCP</td>
+                <td>Daemon base URL</td>
+              </tr>
+              <tr>
+                <td><code>CODEPULSE_ROOT</code></td>
+                <td>agents / daemon</td>
+                <td>Workspace root for paths</td>
+              </tr>
+              <tr>
+                <td><code>CODEPULSE_SESSION_ID</code></td>
+                <td>agents</td>
+                <td>Stable session id for queries</td>
+              </tr>
+              <tr>
+                <td><code>CODEPULSE_INCLUDE</code></td>
+                <td>.NET agent</td>
+                <td>Namespace prefix to patch</td>
+              </tr>
+              <tr>
+                <td><code>CODEPULSE_MODE</code></td>
+                <td>agents</td>
+                <td><code>baseline</code> / <code>targeted</code> / <code>off</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Troubleshooting</h2>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>Symptom</th>
+                <th>Check</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Empty hot-paths</td>
+                <td>
+                  Agent installed before app code; workload hit instrumented functions;
+                  <code>CODEPULSE_ROOT</code> matches <code>--root</code>
+                </td>
+              </tr>
+              <tr>
+                <td>MCP tools error</td>
+                <td>Daemon <code>/health</code>; <code>CODEPULSE_ENDPOINT</code> in MCP env</td>
+              </tr>
+              <tr>
+                <td>Structural search unsupported</td>
+                <td>Python or C# under indexed root</td>
+              </tr>
+              <tr>
+                <td>.NET patched 0 methods</td>
+                <td><code>CODEPULSE_INCLUDE</code> matches namespace; call <code>Install</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <nav class="doc-next" aria-label="Related docs">
+          <a href="getting-started.html">← Getting started</a>
+          <a href="agents.html">Agents →</a>
+          <a href="https://github.com/detroitpro/codepulse/blob/main/docs/guide/ADVANCED.md"
+            >Markdown source</a
+          >
+        </nav>
+      </article>
+    </main>
+
+    <footer class="foot">
+      <span>codepulse</span>
+      <a href="https://github.com/detroitpro/codepulse/blob/main/LICENSE">MIT License</a>
+    </footer>
+    <script src="../copy.js" defer></script>
+  </body>
+</html>

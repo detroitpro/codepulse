@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Getting started — codepulse</title>
+    <meta
+      name="description"
+      content="First-time setup: build the daemon, run the Python demo, wire MCP, get hot paths."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true">
+      <div class="trace"></div>
+    </div>
+
+    <header class="top">
+      <a class="top-brand" href="../index.html">codepulse</a>
+      <nav class="top-nav" aria-label="Primary">
+        <a href="getting-started.html" aria-current="page">Getting started</a>
+        <a href="advanced.html">Advanced</a>
+        <a href="agents.html">Agents</a>
+        <a href="https://github.com/detroitpro/codepulse">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="doc">
+      <header class="doc-hero">
+        <p class="doc-kicker">User guide</p>
+        <h1>Getting started</h1>
+        <p class="doc-lede">
+          First-time path: run the Python demo under codepulse, wire MCP, ask for hot paths.
+        </p>
+      </header>
+
+      <article class="doc-body">
+        <h2>Prerequisites</h2>
+        <ul>
+          <li>Rust toolchain (<code>cargo</code>)</li>
+          <li>Node ≥20</li>
+          <li>Python ≥3.12</li>
+          <li>Git</li>
+        </ul>
+
+        <h2>1. Clone and build the daemon</h2>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="gs-clone">Copy</button>
+          <pre id="gs-clone"><code>git clone https://github.com/detroitpro/codepulse.git
+cd codepulse
+cargo build -p codepulse-daemon</code></pre>
+        </div>
+
+        <h2>2. Start the daemon on the demo root</h2>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="gs-daemon">Copy</button>
+          <pre id="gs-daemon"><code>./target/debug/codepulse \
+  --root examples/python-demo \
+  --db .codepulse/dev.db \
+  --listen 127.0.0.1:7420</code></pre>
+        </div>
+        <p>
+          Check: <code>curl -s http://127.0.0.1:7420/health</code> →
+          <code>{"ok":true,...}</code>
+        </p>
+
+        <h2>3. Run the Python demo with the agent</h2>
+        <p>In another terminal:</p>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="gs-py">Copy</button>
+          <pre id="gs-py"><code>python3 -m venv .codepulse/venv
+source .codepulse/venv/bin/activate
+pip install -e agents/python "fastapi>=0.115" "uvicorn>=0.32"
+
+export CODEPULSE_ENDPOINT=http://127.0.0.1:7420
+export CODEPULSE_ROOT="$PWD/examples/python-demo"
+export CODEPULSE_SESSION_ID=demo
+
+cd examples/python-demo
+PYTHONPATH="$PWD/../../agents/python/src" python - &lt;&lt;'PY'
+from codepulse_agent import install
+install()
+import uvicorn
+from app import app
+uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+PY</code></pre>
+        </div>
+        <p>Drive load:</p>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="gs-scenario">Copy</button>
+          <pre id="gs-scenario"><code>python examples/python-demo/scenario.py</code></pre>
+        </div>
+
+        <h2>4. Wire the MCP server (Cursor)</h2>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="gs-mcp-build">Copy</button>
+          <pre id="gs-mcp-build"><code>cd packages/mcp && npm install && npm run build</code></pre>
+        </div>
+        <p>Add to Cursor MCP settings (adjust path):</p>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="gs-mcp-json">Copy</button>
+          <pre id="gs-mcp-json"><code>{
+  "mcpServers": {
+    "codepulse": {
+      "command": "node",
+      "args": ["/ABS/PATH/to/codepulse/packages/mcp/dist/index.js"],
+      "env": {
+        "CODEPULSE_ENDPOINT": "http://127.0.0.1:7420"
+      }
+    }
+  }
+}</code></pre>
+        </div>
+
+        <h2>5. First successful ask</h2>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="gs-hot">Copy</button>
+          <pre id="gs-hot"><code>curl -s "http://127.0.0.1:7420/v1/query/hot-paths?limit=5"</code></pre>
+        </div>
+        <p>
+          You should see <code>PricingWorkflow.execute</code> /
+          <code>inventory_reserve</code> after the scenario. Or ask your agent: “What were the
+          hottest functions in this session?”
+        </p>
+
+        <h2>One-command check</h2>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="gs-e2e">Copy</button>
+          <pre id="gs-e2e"><code>./scripts/e2e-python.sh</code></pre>
+        </div>
+
+        <nav class="doc-next" aria-label="Related docs">
+          <a href="advanced.html">Advanced →</a>
+          <a href="agents.html">Agents →</a>
+          <a href="https://github.com/detroitpro/codepulse/blob/main/docs/guide/GETTING_STARTED.md"
+            >Markdown source</a
+          >
+        </nav>
+      </article>
+    </main>
+
+    <footer class="foot">
+      <span>codepulse</span>
+      <a href="https://github.com/detroitpro/codepulse/blob/main/LICENSE">MIT License</a>
+    </footer>
+    <script src="../copy.js" defer></script>
+  </body>
+</html>

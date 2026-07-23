@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agents — codepulse</title>
+    <meta
+      name="description"
+      content="MCP config, tool catalog, and a copy-paste bootstrap prompt for AI hosts."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true">
+      <div class="trace"></div>
+    </div>
+
+    <header class="top">
+      <a class="top-brand" href="../index.html">codepulse</a>
+      <nav class="top-nav" aria-label="Primary">
+        <a href="getting-started.html">Getting started</a>
+        <a href="advanced.html">Advanced</a>
+        <a href="agents.html" aria-current="page">Agents</a>
+        <a href="https://github.com/detroitpro/codepulse">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="doc">
+      <header class="doc-hero">
+        <p class="doc-kicker">User guide</p>
+        <h1>Agent integration</h1>
+        <p class="doc-lede">
+          Configure AI hosts to use codepulse via MCP. Copy the bootstrap prompt into a new
+          agent chat for the current project.
+        </p>
+      </header>
+
+      <article class="doc-body">
+        <p>
+          <strong>Agent Skill (repo):</strong>
+          <a href="https://github.com/detroitpro/codepulse/blob/main/skills/codepulse/SKILL.md"
+            ><code>skills/codepulse/SKILL.md</code></a
+          >
+        </p>
+
+        <h2>One-liner</h2>
+        <div class="prompt-box prompt-box-short">
+          <button type="button" class="copy-btn" data-copy-target="ag-oneliner">Copy</button>
+          <pre
+            id="ag-oneliner"
+          ><code>Set up codepulse in this repo: clone detroitpro/codepulse, run the daemon on this workspace root, wire the MCP server, install the Python or .NET agent, then use get_hot_paths / structural_search.</code></pre>
+        </div>
+
+        <h2>Full bootstrap prompt</h2>
+        <p>Paste into a new agent chat for the <em>current</em> project:</p>
+        <div class="prompt-box">
+          <button type="button" class="copy-btn" data-copy-target="ag-bootstrap">Copy</button>
+          <pre id="ag-bootstrap"><code>You are setting up codepulse (https://github.com/detroitpro/codepulse) for THIS repository so I can ask runtime questions via MCP.
+
+Do the following:
+
+1. Detect the primary language (Python ≥3.12 preferred for first setup; .NET if this is a C# app).
+2. If codepulse is not already available locally, clone https://github.com/detroitpro/codepulse.git to a sensible path (or use an existing clone). Build: `cargo build -p codepulse-daemon`.
+3. Start the daemon against THIS workspace root:
+   `./target/debug/codepulse --root &lt;THIS_REPO_ROOT&gt; --db &lt;clone&gt;/.codepulse/&lt;name&gt;.db --listen 127.0.0.1:7420`
+   Verify: `curl -s http://127.0.0.1:7420/health`
+4. Install MCP: in `packages/mcp`, `npm install && npm run build`. Add Cursor MCP config:
+   {
+     "mcpServers": {
+       "codepulse": {
+         "command": "node",
+         "args": ["&lt;ABS&gt;/packages/mcp/dist/index.js"],
+         "env": { "CODEPULSE_ENDPOINT": "http://127.0.0.1:7420" }
+       }
+     }
+   }
+5. Install the matching runtime agent:
+   - Python: `pip install -e &lt;clone&gt;/agents/python`, call `codepulse_agent.install()` at process start,
+     set CODEPULSE_ENDPOINT, CODEPULSE_ROOT=&lt;THIS_REPO_ROOT&gt;, CODEPULSE_SESSION_ID.
+   - .NET: reference CodePulse.Agent, call `CodePulseAgent.Install("Your.Namespace")`,
+     set CODEPULSE_INCLUDE to that namespace prefix.
+6. Tell me how to exercise the app so events appear. Then verify with get_session_overview / get_hot_paths
+   (or curl /v1/query/hot-paths). Prefer answers over raw dumps.
+
+Constraints: local-first; never request args/returns/locals; use structural_search for AST patterns
+(indexer, not ast-grep CLI). Skill: skills/codepulse/SKILL.md in the codepulse repo.
+Docs: docs/guide/GETTING_STARTED.md, docs/MCP_API.md.</code></pre>
+        </div>
+
+        <h2>Install script snippet</h2>
+        <div class="copy-block">
+          <button type="button" class="copy-btn" data-copy-target="ag-install">Copy</button>
+          <pre id="ag-install"><code>CODEPULSE_HOME="${CODEPULSE_HOME:-$HOME/src/codepulse}"
+APP_ROOT="${APP_ROOT:-$PWD}"
+
+if [ ! -d "$CODEPULSE_HOME/.git" ]; then
+  git clone https://github.com/detroitpro/codepulse.git "$CODEPULSE_HOME"
+fi
+cd "$CODEPULSE_HOME"
+cargo build -p codepulse-daemon
+(cd packages/mcp && npm install && npm run build)
+
+./target/debug/codepulse \
+  --root "$APP_ROOT" \
+  --db "$CODEPULSE_HOME/.codepulse/app.db" \
+  --listen 127.0.0.1:7420</code></pre>
+        </div>
+
+        <h2>Tool catalog — when to use which</h2>
+        <dl class="tools doc-tools">
+          <div>
+            <dt><code>get_session_overview</code></dt>
+            <dd>Orient: sessions, coverage, top hot paths</dd>
+          </div>
+          <div>
+            <dt><code>get_hot_paths</code></dt>
+            <dd>“What ran the most?”</dd>
+          </div>
+          <div>
+            <dt><code>get_actual_callers</code></dt>
+            <dd>Real callers of a symbol (not static graph)</dd>
+          </div>
+          <div>
+            <dt><code>get_function_runtime_summary</code></dt>
+            <dd>Stats for one function</dd>
+          </div>
+          <div>
+            <dt><code>structural_search</code></dt>
+            <dd>Find code by AST pattern (Python/C#)</dd>
+          </div>
+          <div>
+            <dt><code>compare_static_vs_runtime</code></dt>
+            <dd>Declared vs observed for a symbol</dd>
+          </div>
+          <div>
+            <dt><code>enable_targeted_instrumentation</code></dt>
+            <dd>Need deeper edges for a short window</dd>
+          </div>
+          <div>
+            <dt><code>list_uncovered_hot_symbols</code></dt>
+            <dd>Complex static symbols never hit</dd>
+          </div>
+        </dl>
+
+        <h2>Suggested workflow</h2>
+        <ol>
+          <li><code>structural_search</code> or name guess → candidate symbols</li>
+          <li><code>get_hot_paths</code> / summary → did they run?</li>
+          <li><code>get_actual_callers</code> → who called them?</li>
+          <li>
+            If thin: <code>enable_targeted_instrumentation</code> → reproduce → re-query
+          </li>
+          <li>Answer with concrete functions; do not paste huge event dumps</li>
+        </ol>
+
+        <nav class="doc-next" aria-label="Related docs">
+          <a href="getting-started.html">← Getting started</a>
+          <a href="advanced.html">← Advanced</a>
+          <a href="https://github.com/detroitpro/codepulse/blob/main/docs/guide/AGENTS.md"
+            >Markdown source</a
+          >
+        </nav>
+      </article>
+    </main>
+
+    <footer class="foot">
+      <span>codepulse</span>
+      <a href="https://github.com/detroitpro/codepulse/blob/main/LICENSE">MIT License</a>
+    </footer>
+    <script src="../copy.js" defer></script>
+  </body>
+</html>
