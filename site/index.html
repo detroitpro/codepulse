@@ -3,31 +3,231 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>codepulse</title>
+    <title>codepulse — runtime intelligence for AI agents</title>
     <meta
       name="description"
-      content="Adaptive runtime intelligence for AI coding agents — live behavioral model plus static structure, queried through a compact MCP surface."
+      content="codepulse gives AI coding agents a live behavioral model of your app, joined with static structure, through a compact MCP query surface."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="stage">
-      <div class="trace" aria-hidden="true"></div>
+    <div class="atmosphere" aria-hidden="true">
+      <div class="trace"></div>
+    </div>
+
+    <header class="top">
+      <a class="top-brand" href="#top">codepulse</a>
+      <nav class="top-nav" aria-label="Primary">
+        <a href="#capabilities">Capabilities</a>
+        <a href="#how">How it works</a>
+        <a href="#mcp">MCP</a>
+        <a href="https://github.com/detroitpro/codepulse">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="top">
       <section class="hero">
-        <h1 class="brand">
-          <span class="pulse" aria-hidden="true"></span>
-          codepulse
-        </h1>
-        <p class="headline">Adaptive runtime intelligence for AI coding agents.</p>
-        <p class="lede">
-          A live behavioral model joined with static structure — queried through a compact
-          MCP surface, not a firehose of traces.
+        <div class="hero-copy">
+          <h1 class="brand">
+            <span class="pulse" aria-hidden="true"></span>
+            codepulse
+          </h1>
+          <p class="headline">Your agents finally see what the code does when it runs.</p>
+          <p class="lede">
+            Live behavioral models joined with static structure — queried as compact answers
+            over MCP, not megabytes of traces.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="https://github.com/detroitpro/codepulse"
+              >Get the source</a
+            >
+            <a
+              class="btn btn-ghost"
+              href="https://github.com/detroitpro/codepulse/blob/main/docs/PRODUCT.md"
+              >Product docs</a
+            >
+          </div>
+        </div>
+        <aside class="hero-visual" aria-label="Example agent query">
+          <div class="console">
+            <div class="console-bar">
+              <span></span><span></span><span></span>
+              <em>agent ↔ codepulse</em>
+            </div>
+            <pre class="console-body"><code><span class="tok-dim">›</span> get_hot_paths(metric=<span class="tok-str">"invocations"</span>)
+<span class="tok-ok">←</span> PricingWorkflow.execute   <span class="tok-num">148 221</span>
+<span class="tok-ok">←</span> api.handle_checkout        <span class="tok-num">90 014</span>
+<span class="tok-ok">←</span> inventory.reserve          <span class="tok-num">61 882</span>
+
+<span class="tok-dim">›</span> get_actual_callers(<span class="tok-str">"…execute"</span>)
+<span class="tok-ok">←</span> 6 callers · top: handle_checkout
+
+<span class="tok-dim">›</span> enable_targeted_instrumentation(30s)
+<span class="tok-ok">←</span> probe window active · budget held</code></pre>
+          </div>
+        </aside>
+      </section>
+
+      <section class="band" id="why">
+        <div class="band-inner">
+          <h2>Source text is not enough</h2>
+          <p>
+            Coding agents reason from files and symbols. Real systems also have hot paths,
+            observed callers, failure concentration, and dead complexity. codepulse turns that
+            runtime truth into something agents can ask for.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="capabilities">
+        <div class="section-head">
+          <h2>What agents can ask</h2>
+          <p>Compact summaries shaped for model context — never a firehose of call events.</p>
+        </div>
+        <ul class="capability-list">
+          <li>
+            <strong>Hottest functions</strong>
+            <span>Rank symbols by invocations, p95 duration, or exceptions in a session.</span>
+          </li>
+          <li>
+            <strong>Actual callers &amp; callees</strong>
+            <span>See who called a method in practice, not only what the AST declares.</span>
+          </li>
+          <li>
+            <strong>Static vs observed</strong>
+            <span>Compare syntactic edges to runtime edges; find never-hit callees.</span>
+          </li>
+          <li>
+            <strong>Adaptive deepen</strong>
+            <span>Time-boxed exact instrumentation on a small target set when baseline is thin.</span>
+          </li>
+          <li>
+            <strong>Uncovered complexity</strong>
+            <span>Surface symbols that look hard in the AST but never ran.</span>
+          </li>
+          <li>
+            <strong>Bounded overhead</strong>
+            <span>Cheap always-on sampling by default; the controller owns the probe budget.</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section section-alt" id="how">
+        <div class="section-head">
+          <h2>How it works</h2>
+          <p>One local daemon. Runtime agents as plugins. MCP for the AI host.</p>
+        </div>
+        <ol class="flow">
+          <li>
+            <span class="flow-step">01</span>
+            <div>
+              <strong>Baseline ingest</strong>
+              <p>
+                The Python agent aggregates coarse call stats and posts batches to the Rust
+                daemon. SQLite stores the live behavioral model.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span class="flow-step">02</span>
+            <div>
+              <strong>Static index</strong>
+              <p>
+                tree-sitter walks the project, extracts symbols and complexity, and joins them
+                to runtime identity by normalized <code>SymbolId</code>.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span class="flow-step">03</span>
+            <div>
+              <strong>MCP answers</strong>
+              <p>
+                Cursor, Claude Code, and other hosts call tools like
+                <code>get_function_runtime_summary</code> and <code>get_hot_paths</code> —
+                summaries only.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span class="flow-step">04</span>
+            <div>
+              <strong>Probe windows</strong>
+              <p>
+                When evidence is thin, the agent enables targeted instrumentation for a bounded
+                window. On expiry or budget breach, exact mode auto-disables.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section" id="mcp">
+        <div class="section-head">
+          <h2>MCP tool surface</h2>
+          <p>TypeScript server talking to the local daemon. Designed for agent workflows.</p>
+        </div>
+        <dl class="tools">
+          <div>
+            <dt><code>get_hot_paths</code></dt>
+            <dd>Ranked hotspots by invocations, duration, or exceptions.</dd>
+          </div>
+          <div>
+            <dt><code>get_function_runtime_summary</code></dt>
+            <dd>Invocations, exceptions, latency percentiles, top callers.</dd>
+          </div>
+          <div>
+            <dt><code>get_actual_callers</code> / <code>get_actual_callees</code></dt>
+            <dd>Observed edges with counts.</dd>
+          </div>
+          <div>
+            <dt><code>get_static_summary</code></dt>
+            <dd>Complexity, size, syntactic callee counts.</dd>
+          </div>
+          <div>
+            <dt><code>compare_static_vs_runtime</code></dt>
+            <dd>Declared vs observed structure in one answer.</dd>
+          </div>
+          <div>
+            <dt><code>enable_targeted_instrumentation</code></dt>
+            <dd>Deepen a small target set for a fixed duration under budget.</dd>
+          </div>
+          <div>
+            <dt><code>list_uncovered_hot_symbols</code></dt>
+            <dd>Complex static symbols with zero runtime hits.</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="section section-alt" id="principles">
+        <div class="section-head">
+          <h2>Built for agents, not dashboards</h2>
+          <p>Local-first. Privacy fail-closed. Platform language independent of the target runtime.</p>
+        </div>
+        <ul class="principles">
+          <li><strong>Answers over streams</strong> — summaries fit model context.</li>
+          <li><strong>Adaptive cost</strong> — overhead is a controller-owned budget.</li>
+          <li><strong>Static + dynamic together</strong> — neither alone is enough.</li>
+          <li><strong>Local-first</strong> — works offline in your repo; no SaaS required.</li>
+          <li><strong>Fail closed on privacy</strong> — no args, returns, or locals by default.</li>
+          <li><strong>Runtime agents are plugins</strong> — Python first; protocol-ready for more.</li>
+        </ul>
+        <p class="stack-line">
+          Stack: Rust daemon · tree-sitter indexer · TypeScript MCP · Python ≥3.12 agent
+        </p>
+      </section>
+
+      <section class="closing">
+        <h2>Give your agent a pulse on the running system</h2>
+        <p>
+          Open source. Point the MCP server at a workspace daemon, load the Python agent, and
+          ask what actually runs.
         </p>
         <div class="actions">
           <a class="btn btn-primary" href="https://github.com/detroitpro/codepulse"
@@ -35,12 +235,16 @@
           >
           <a
             class="btn btn-ghost"
-            href="https://github.com/detroitpro/codepulse/blob/main/docs/PRODUCT.md"
-            >Read the docs</a
+            href="https://github.com/detroitpro/codepulse/blob/main/docs/ARCHITECTURE.md"
+            >Architecture</a
           >
         </div>
-        <p class="status">Design phase — docs and stubs only. No live instrumentation yet.</p>
       </section>
     </main>
+
+    <footer class="foot">
+      <span>codepulse</span>
+      <a href="https://github.com/detroitpro/codepulse/blob/main/LICENSE">MIT License</a>
+    </footer>
   </body>
 </html>
