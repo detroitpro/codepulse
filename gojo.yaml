@@ -6,8 +6,8 @@ project:
 
 repository:
   remote: origin
-  syncBeforeRun: false
-  requireCleanBase: false
+  syncBeforeRun: true
+  requireCleanBase: true
   submodules: false
   gitLfs: false
 
@@ -15,6 +15,10 @@ agents:
   shell:
     adapter: shell
     timeout: 5m
+  cursor:
+    adapter: cursor
+    model: default
+    timeout: 45m
 
 validationProfiles:
   repo-brief:
@@ -31,6 +35,29 @@ validationProfiles:
       - name: enough-content
         command: "wc -l docs/REPO_BRIEF.md | awk '$1 >= 20'"
         timeout: 30s
+  deps-rust:
+    steps:
+      - name: cargo-test
+        command: cargo test --workspace
+        timeout: 20m
+  deps-python:
+    steps:
+      - name: pip-install
+        command: python3 -m venv .codepulse/gojo-venv && .codepulse/gojo-venv/bin/pip install -U pip && .codepulse/gojo-venv/bin/pip install -e "agents/python[dev]"
+        timeout: 10m
+      - name: import-smoke
+        command: .codepulse/gojo-venv/bin/python -c "from codepulse_agent import install; print('ok')"
+        timeout: 2m
+  deps-dotnet:
+    steps:
+      - name: dotnet-test
+        command: dotnet test -c Release --project agents/dotnet/CodePulse.Agent.Tests/CodePulse.Agent.Tests.csproj
+        timeout: 15m
+  deps-babysit:
+    steps:
+      - name: noop
+        command: "true"
+        timeout: 30s
 
 tasks:
   repo-brief:
@@ -44,5 +71,90 @@ tasks:
       requireAllValidations: true
       commitMessage: "gojo: add repository brief"
 
-schedules: {}
+  deps-rust:
+    description: Update Rust workspace dependencies and open a PR
+    agent: cursor
+    promptFile: .gojo/tasks/deps-rust.md
+    validationProfile: deps-rust
+    concurrency:
+      projectLimit: 1
+      overlapPolicy: skip
+    integration:
+      mode: pull-request
+      targetBranch: main
+      requireAllValidations: true
+    failurePolicy:
+      maxAttemptsPerRun: 2
+      disableAfterConsecutiveFailedRuns: 3
+      backoff: exponential
+
+  deps-python:
+    description: Update Python agent dependencies and open a PR
+    agent: cursor
+    promptFile: .gojo/tasks/deps-python.md
+    validationProfile: deps-python
+    concurrency:
+      projectLimit: 1
+      overlapPolicy: skip
+    integration:
+      mode: pull-request
+      targetBranch: main
+      requireAllValidations: true
+    failurePolicy:
+      maxAttemptsPerRun: 2
+      disableAfterConsecutiveFailedRuns: 3
+      backoff: exponential
+
+  deps-dotnet:
+    description: Update .NET agent dependencies and open a PR
+    agent: cursor
+    promptFile: .gojo/tasks/deps-dotnet.md
+    validationProfile: deps-dotnet
+    concurrency:
+      projectLimit: 1
+      overlapPolicy: skip
+    integration:
+      mode: pull-request
+      targetBranch: main
+      requireAllValidations: true
+    failurePolicy:
+      maxAttemptsPerRun: 2
+      disableAfterConsecutiveFailedRuns: 3
+      backoff: exponential
+
+  deps-pr-babysit:
+    description: Babysit and merge open gojo dependency PRs
+    agent: cursor
+    promptFile: .gojo/tasks/deps-pr-babysit.md
+    validationProfile: deps-babysit
+    concurrency:
+      projectLimit: 1
+      overlapPolicy: skip
+    integration:
+      mode: commit-only
+      targetBranch: main
+      requireAllValidations: true
+    failurePolicy:
+      maxAttemptsPerRun: 1
+      disableAfterConsecutiveFailedRuns: 5
+      backoff: exponential
+
+schedules:
+  deps-rust-weekly:
+    task: deps-rust
+    cron: "0 3 * * 5"
+    timezone: America/Detroit
+  deps-python-weekly:
+    task: deps-python
+    cron: "0 3 * * 6"
+    timezone: America/Detroit
+  deps-dotnet-weekly:
+    task: deps-dotnet
+    cron: "0 3 * * 0"
+    timezone: America/Detroit
+  deps-pr-babysit-daily:
+    task: deps-pr-babysit
+    cron: "0 6 * * *"
+    timezone: America/Detroit
+
 notifications: {}

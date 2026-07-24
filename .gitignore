@@ -38,3 +38,7 @@ build/
 
 # here.now local publish state
 .herenow/
+
+# gojo runtime artifacts (keep .gojo/tasks/** tracked)
+.gojo/run.sh
+.gojo/handoff.json
