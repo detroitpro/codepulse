@@ -1,0 +1,48 @@
+version: 1
+
+project:
+  name: codepulse
+  defaultBranch: main
+
+repository:
+  remote: origin
+  syncBeforeRun: false
+  requireCleanBase: false
+  submodules: false
+  gitLfs: false
+
+agents:
+  shell:
+    adapter: shell
+    timeout: 5m
+
+validationProfiles:
+  repo-brief:
+    steps:
+      - name: file-exists
+        command: test -f docs/REPO_BRIEF.md
+        timeout: 30s
+      - name: has-stack
+        command: grep -q '^## Stack' docs/REPO_BRIEF.md
+        timeout: 30s
+      - name: has-layout
+        command: grep -q '^## Layout' docs/REPO_BRIEF.md
+        timeout: 30s
+      - name: enough-content
+        command: "wc -l docs/REPO_BRIEF.md | awk '$1 >= 20'"
+        timeout: 30s
+
+tasks:
+  repo-brief:
+    description: Inventory the repo and write docs/REPO_BRIEF.md
+    agent: shell
+    promptFile: .gojo/tasks/repo-brief.sh
+    validationProfile: repo-brief
+    integration:
+      mode: commit-only
+      targetBranch: main
+      requireAllValidations: true
+      commitMessage: "gojo: add repository brief"
+
+schedules: {}
+notifications: {}
