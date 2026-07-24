@@ -7,7 +7,7 @@ You are executing an unattended gojo scheduled task for **codepulse** (.NET Harm
 1. Identify outdated NuGet packages for the .NET agent and tests.
 2. Apply safe patch/minor upgrades in `PackageReference` versions.
 3. Fix compile/test failures caused by those upgrades.
-4. Leave the solution ready for gojo validation (`dotnet test -c Release`).
+4. Leave the solution ready for gojo validation (`dotnet test -c Release agents/dotnet/CodePulse.Agent.Tests/CodePulse.Agent.Tests.csproj`).
 
 ## Scope
 
@@ -29,7 +29,7 @@ You are executing an unattended gojo scheduled task for **codepulse** (.NET Harm
 
 1. From `agents/dotnet`, run `dotnet list package --outdated` (or equivalent).
 2. Bump safe package versions in the csproj files; `dotnet restore` as needed.
-3. Fix compile/test fallout; gojo re-runs `dotnet test -c Release` after you exit.
+3. Fix compile/test fallout; gojo re-runs `dotnet test -c Release agents/dotnet/CodePulse.Agent.Tests/CodePulse.Agent.Tests.csproj` after you exit.
 4. If nothing useful is outdated, leave a clean tree and say so in the handoff.
 
 ## Required handoff
