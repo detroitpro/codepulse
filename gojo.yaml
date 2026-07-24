@@ -51,12 +51,17 @@ validationProfiles:
   deps-dotnet:
     steps:
       - name: dotnet-test
-        command: dotnet test -c Release --project agents/dotnet/CodePulse.Agent.Tests/CodePulse.Agent.Tests.csproj
+        command: dotnet test -c Release agents/dotnet/CodePulse.Agent.Tests/CodePulse.Agent.Tests.csproj
         timeout: 15m
   deps-babysit:
     steps:
       - name: noop
         command: "true"
+        timeout: 30s
+  self-heal:
+    steps:
+      - name: handoff-exists
+        command: test -f .gojo/handoff.json
         timeout: 30s
 
 tasks:
@@ -87,6 +92,9 @@ tasks:
       maxAttemptsPerRun: 2
       disableAfterConsecutiveFailedRuns: 3
       backoff: exponential
+    selfHeal:
+      task: self-heal
+      afterConsecutiveFailedRuns: 1
 
   deps-python:
     description: Update Python agent dependencies and open a PR
@@ -104,6 +112,9 @@ tasks:
       maxAttemptsPerRun: 2
       disableAfterConsecutiveFailedRuns: 3
       backoff: exponential
+    selfHeal:
+      task: self-heal
+      afterConsecutiveFailedRuns: 1
 
   deps-dotnet:
     description: Update .NET agent dependencies and open a PR
@@ -121,6 +132,9 @@ tasks:
       maxAttemptsPerRun: 2
       disableAfterConsecutiveFailedRuns: 3
       backoff: exponential
+    selfHeal:
+      task: self-heal
+      afterConsecutiveFailedRuns: 1
 
   deps-pr-babysit:
     description: Babysit and merge open gojo dependency PRs
@@ -139,6 +153,23 @@ tasks:
       disableAfterConsecutiveFailedRuns: 5
       backoff: exponential
 
+  self-heal:
+    description: Diagnose failed gojo runs and open a reviewable fix PR
+    agent: cursor
+    promptFile: .gojo/tasks/self-heal.md
+    validationProfile: self-heal
+    concurrency:
+      projectLimit: 1
+      overlapPolicy: skip
+    integration:
+      mode: pull-request
+      targetBranch: main
+      requireAllValidations: true
+    failurePolicy:
+      maxAttemptsPerRun: 1
+      disableAfterConsecutiveFailedRuns: 5
+      backoff: none
+
 schedules:
   deps-rust-weekly:
     task: deps-rust
@@ -155,6 +186,10 @@ schedules:
   deps-pr-babysit-daily:
     task: deps-pr-babysit
     cron: "0 6 * * *"
+    timezone: America/Detroit
+  self-heal-daily:
+    task: self-heal
+    cron: "30 6 * * *"
     timezone: America/Detroit
 
 notifications: {}
