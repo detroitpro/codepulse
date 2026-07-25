@@ -11,6 +11,12 @@ repository:
   submodules: false
   gitLfs: false
 
+instructions:
+  files:
+    - .gojo/instructions.md
+  scheduledRunNotice: |
+    Unattended scheduled gojo run. Prefer small diffs. Write .gojo/handoff.json before exiting.
+
 agents:
   shell:
     adapter: shell

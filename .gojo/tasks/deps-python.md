@@ -1,6 +1,6 @@
 # Python agent dependency maintenance
 
-You are executing an unattended gojo scheduled task for **codepulse** (Python runtime agent).
+Unattended gojo task for **codepulse** (Python runtime agent). Keep `agents/python` deps current within safe ranges; no product features.
 
 ## Goals
 
@@ -14,14 +14,17 @@ You are executing an unattended gojo scheduled task for **codepulse** (Python ru
 - [`agents/python/pyproject.toml`](agents/python/pyproject.toml) and Python sources under `agents/python/`.
 - Do **not** change Rust crates, .NET projects, or `packages/mcp` in this run.
 
+## How you think
+
+- Prefer patch/minor lower-bound bumps; skip majors and record them as deferred.
+- Keep `[dev]` extras aligned with what validation actually installs.
+- Do not commit `.venv/` or `.codepulse/` artifacts.
+
 ## Hard rules
 
-- Do **not** push, open PRs, or merge. gojo owns Git integration (`pull-request` mode).
-- Do **not** commit secrets, `.venv/`, or `.codepulse/` artifacts.
-- Skip major migrations; record deferred upgrades in the handoff.
-- Prefer the smallest change set.
-- Stay inside this worktree.
-- Do **not** weaken CI to force a pass.
+- Branch will look like `gojo/deps-python/...`.
+- **Limit:** bump at most **8** direct dependencies in `pyproject.toml` per run.
+- If more packages need upgrades, stop at the limit once validation would pass and list the rest in `recommendedNextActions`.
 
 ## Process
 
@@ -32,15 +35,4 @@ You are executing an unattended gojo scheduled task for **codepulse** (Python ru
 
 ## Required handoff
 
-Write `.gojo/handoff.json` before you finish (schemaVersion 1). **gojo opens the PR from this handoff** (title ≈ first line of `summary`; body from summary/decisions/files). Do **not** run `gh pr create` yourself.
-
-Include:
-
-- `summary` — first line is the PR title; cover **what** was bumped (packages/versions), **why**, and the **value** — or “no changes”
-- `filesChanged`
-- `decisions` — skipped majors and other choices with rationale
-- `unresolvedIssues` / `recommendedNextActions`
-- `agentAssessment.successful` and `confidence`
-- `status`: `"completed"`
-
-Use a placeholder ULID for `runId` if unknown.
+Write `.gojo/handoff.json` (see project instructions for report judgment). Include `summary` (packages/versions, why, value — or “no changes”), `filesChanged`, `decisions` (skipped majors), follow-ups, `agentAssessment`, `status`: `"completed"`.

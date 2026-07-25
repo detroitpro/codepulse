@@ -1,12 +1,15 @@
 # Dependency PR babysitter
 
-You are executing an unattended gojo scheduled task for **codepulse**. Your job is to get open **dependency-update PRs** merge-ready and merge them when green.
+Unattended gojo task for **codepulse**. Get open **dependency-update PRs** merge-ready and merge them when green.
+
+This task **owns merge/push** on allowlisted PR branches (exception to the shared “do not push/merge” default).
 
 ## Goals
 
 1. Find open GitHub PRs for this repo that look like gojo dependency runs.
 2. Babysit each until mergeable (or clearly blocked).
 3. Merge when CI is green and comments are triaged.
+4. Cap at **3 PRs** per run (newest first).
 
 ## Which PRs
 
@@ -16,9 +19,9 @@ Target open PRs against `main` that match any of:
 - Title containing `gojo: deps` or `dependency` / `deps-rust` / `deps-python` / `deps-dotnet`
 - Head branch created by a recent gojo dep maintenance run
 
-Skip unrelated PRs. Prefer newest first. Cap at **3 PRs** per run.
+Skip unrelated PRs. Prefer newest first.
 
-## Babysit loop (Cursor babysit skill)
+## Babysit loop
 
 For each PR:
 
@@ -32,19 +35,13 @@ For each PR:
 
 - You **may** use `gh` and `git push` on the PR branches — this task owns GitHub merge, unlike the bump tasks.
 - If an allowlisted PR still has a stub/empty body (`Automated run…` / no what-why-value), improve the description with `gh pr edit` when you touch that PR (use the handoff or commit messages — do not invent features).
+- **Limit:** babysit/merge at most **3** allowlisted PRs per run.
 - Do **not** push unrelated commits to `main` outside of the merge.
 - Do **not** invent secrets or change gojo host config.
 - Stay focused on dependency PRs for **detroitpro/codepulse**.
 - If no matching open PRs: exit successfully with an empty-action handoff.
+- If more allowlisted PRs remain open, stop at three and list them in `recommendedNextActions`.
 
 ## Required handoff
 
-Write `.gojo/handoff.json` before you finish (schemaVersion 1), including:
-
-- `summary` (PRs found, fixed, merged, skipped)
-- `filesChanged` (if you pushed fixes)
-- `decisions` / `unresolvedIssues` / `recommendedNextActions`
-- `agentAssessment.successful` and `confidence`
-- `status`: `"completed"`
-
-Use a placeholder ULID for `runId` if unknown.
+Write `.gojo/handoff.json` (schemaVersion 1). Include `summary` (PRs found, fixed, merged, skipped — with why for skips), `filesChanged` (if you pushed fixes), `decisions` / `unresolvedIssues` / `recommendedNextActions`, `agentAssessment`, `status`: `"completed"`. Use a placeholder ULID for `runId` if unknown.
