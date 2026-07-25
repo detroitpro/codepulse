@@ -34,11 +34,14 @@ You are executing an unattended gojo scheduled task for **codepulse** (.NET Harm
 
 ## Required handoff
 
-Write `.gojo/handoff.json` before you finish (schemaVersion 1), including:
+Write `.gojo/handoff.json` before you finish (schemaVersion 1). **gojo opens the PR from this handoff** (title ≈ first line of `summary`; body from summary/decisions/files). Do **not** run `gh pr create` yourself.
 
-- `summary` of upgrades applied (or “no changes”)
+Include:
+
+- `summary` — first line is the PR title; cover **what** was bumped (packages/versions), **why**, and the **value** — or “no changes”
 - `filesChanged`
-- `decisions` / `unresolvedIssues` / `recommendedNextActions`
+- `decisions` — skipped majors and other choices with rationale
+- `unresolvedIssues` / `recommendedNextActions`
 - `agentAssessment.successful` and `confidence`
 - `status`: `"completed"`
 

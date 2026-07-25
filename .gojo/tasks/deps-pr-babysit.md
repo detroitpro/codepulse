@@ -31,6 +31,7 @@ For each PR:
 ## Hard rules
 
 - You **may** use `gh` and `git push` on the PR branches — this task owns GitHub merge, unlike the bump tasks.
+- If an allowlisted PR still has a stub/empty body (`Automated run…` / no what-why-value), improve the description with `gh pr edit` when you touch that PR (use the handoff or commit messages — do not invent features).
 - Do **not** push unrelated commits to `main` outside of the merge.
 - Do **not** invent secrets or change gojo host config.
 - Stay focused on dependency PRs for **detroitpro/codepulse**.
