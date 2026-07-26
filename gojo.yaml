@@ -177,23 +177,23 @@ tasks:
       backoff: none
 
 schedules:
-  deps-rust-weekly:
+  deps-rust:
     task: deps-rust
     cron: "0 3 * * 5"
     timezone: America/Detroit
-  deps-python-weekly:
+  deps-python:
     task: deps-python
     cron: "0 3 * * 6"
     timezone: America/Detroit
-  deps-dotnet-weekly:
+  deps-dotnet:
     task: deps-dotnet
     cron: "0 3 * * 0"
     timezone: America/Detroit
-  deps-pr-babysit-daily:
+  deps-pr-babysit:
     task: deps-pr-babysit
     cron: "0 6 * * *"
     timezone: America/Detroit
-  self-heal-daily:
+  self-heal:
     task: self-heal
     cron: "30 6 * * *"
     timezone: America/Detroit
