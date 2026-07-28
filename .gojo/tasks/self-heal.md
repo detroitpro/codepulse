@@ -17,7 +17,7 @@ Use `Authorization: Bearer $GOJO_API_TOKEN` on all API calls.
 3. Decide whether the root cause is:
    - **Config/prompt/validation drift** → fix `gojo.yaml` / `.gojo/tasks/` / `.gojo/instructions.md`.
    - **Substance** (real code/test break from a dependency bump) → fix if safe and scoped; otherwise analysis-only PR.
-4. Open a PR. Do **not** merge.
+4. Land durable fixes in git when safe (see **Integration** below). Do **not** push, merge, or run `gh pr create` yourself.
 
 ## How you think
 
@@ -44,8 +44,16 @@ Use `Authorization: Bearer $GOJO_API_TOKEN` on all API calls.
 5. Otherwise edit the appropriate files; re-run the failing validation from the worktree root when practical.
 6. Write `.gojo/handoff.json` (schemaVersion 1).
 
+## Integration
+
+This task omits `integration` in `gojo.yaml` (report-only). gojo records the handoff artifact and succeeds without opening a PR — including diagnose-only runs with no tree diff.
+
+- **Diagnose-only** (most runs): `status`: `"no-change"`, empty `filesChanged`, clean tree.
+- **Substantive manifest/code fix**: edit files in the worktree, validate locally, list paths in `filesChanged`, and spell out the exact diff in `summary`/`decisions`. The worktree is discarded after the run; the persisted handoff artifact is the source of truth for a follow-up PR (operator or a one-off task with `integration.mode: pull-request`).
+- **Dedupe**: if an open PR already covers the failure, point at it and use `status`: `"no-change"`.
+
 ## Required handoff
 
-Write `.gojo/handoff.json` (see project instructions for report judgment). **gojo opens the PR from this handoff** — unless diagnose-only / existing open PR (leave `filesChanged` empty so no PR opens).
+Write `.gojo/handoff.json` (see project instructions for report judgment).
 
-Include `summary` (what failed, why, fix or why no code fix, value for next run), `filesChanged`, `decisions`, follow-ups (include human review), `agentAssessment`, `status`: `"completed"`.
+Include `summary` (what failed, why, fix or why no code fix, value for next run), `filesChanged`, `decisions`, follow-ups (include human review), `agentAssessment`, and `status`: `"no-change"` when idle or `"completed"` when you validated a fix in the worktree.
