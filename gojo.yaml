@@ -160,17 +160,13 @@ tasks:
       backoff: exponential
 
   self-heal:
-    description: Diagnose failed gojo runs and open a reviewable fix PR
+    description: Diagnose failed gojo runs and report durable fixes in handoff
     agent: cursor
     promptFile: .gojo/tasks/self-heal.md
     validationProfile: self-heal
     concurrency:
       projectLimit: 1
       overlapPolicy: skip
-    integration:
-      mode: pull-request
-      targetBranch: main
-      requireAllValidations: true
     failurePolicy:
       maxAttemptsPerRun: 1
       disableAfterConsecutiveFailedRuns: 5
