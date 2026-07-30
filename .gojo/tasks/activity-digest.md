@@ -63,46 +63,59 @@ group of them to a count, do not label anything "maintenance" and move on.
 Good — specific about the surface, the mechanism, and the consequence:
 
 ```
-• Self-heal exits cleanly on diagnose-only runs
-  The healer treated "nothing to fix" as a failed run, so the daily diagnostic reported red every
-  day it had no code change to make and real breakage was buried in the noise. It now writes a
-  no-change handoff and skips integration entirely. (#8)
+**Self-heal exits cleanly on diagnose-only runs** (#8)
+
+The healer treated "nothing to fix" as a failed run, so the daily diagnostic reported red every
+day it had no code change to make and real breakage was buried in the noise. It now writes a
+no-change handoff and skips integration entirely.
 ```
 
 Bad — restates the title, says nothing about what moved:
 
 ```
-• #8 Fix self-heal failing on diagnose-only runs
+**#8 Fix self-heal failing on diagnose-only runs**
+
+(no detail body)
 ```
 
 Bad — adjectives with no technical content:
 
 ```
-• Improved reliability of the agent pipeline
-  This makes codepulse more robust and improves the developer experience.
+**Improved reliability of the agent pipeline**
+
+This makes codepulse more robust and improves the developer experience.
 ```
 
 ## Message shape
 
-Plain text for Telegram. No markdown tables, no headings, no code fences.
+Telegram HTML. Use `**bold**` for titles and section labels — the platform turns those into real
+bold. No markdown tables, no `#` headings, no code fences, no bullet characters.
+
+Each shipped item is a **header line** then a **blank line** then a **detail paragraph**, then
+another blank line before the next item. That spacing is what keeps the message scannable; do not
+pack header and detail onto adjacent lines.
 
 ```
-codepulse — daily brief, 2026-07-28
+**codepulse — daily brief, 2026-07-28**
 
-Shipped
-• <headline>
-  <what moved, the mechanism, the effect> (#8)
+**Shipped**
 
-In flight
-• <what it will give you> — checks passing, waiting on review (#12)
+**<headline>** (#8)
 
-Needs attention
-• #9 open 4 days, cargo test failing
+<what moved, the mechanism, the effect>
+
+**In flight**
+
+**<what it will give you>** — checks passing, waiting on review (#12)
+
+**Needs attention**
+
+**#9** — open 4 days, cargo test failing
 ```
 
 Budget **3800 characters**. If there are enough merges that you would run past it, tighten every
-entry to a headline plus one dense sentence. Do not drop entries and do not collapse a group into a
-count.
+entry to a bold header plus one dense sentence. Do not drop entries and do not collapse a group into
+a count.
 
 Omit any section that is empty. When nothing merged, say `Nothing shipped in the last 24h.` and
 still report in-flight and attention items.
