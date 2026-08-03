@@ -24,7 +24,7 @@ Every decision should converge on these:
 Unless the task explicitly owns merge/push (e.g. deps-pr-babysit):
 
 - Do **not** push, open PRs, or merge. gojo `pull-request` / `commit-only` integration owns Git.
-- Write `.gojo/handoff.json` (schemaVersion 1) before you finish. **gojo opens the PR from this handoff.** Do **not** run `gh pr create` yourself.
+- Write `.gojo/handoff.json` before you finish. Prefer **schemaVersion 3** (or 2 when reporting `impact` only). **gojo opens the PR from this handoff.** Do **not** run `gh pr create` yourself.
 - Use a placeholder ULID for `runId` if unknown.
 
 ## How you report (handoff judgment)
@@ -36,3 +36,7 @@ The PR title/body come from the handoff. Reviewers should not need the raw agent
 - `filesChanged` — accurate when you edited the tree; empty when diagnose-only / no PR.
 - `unresolvedIssues` / `recommendedNextActions` — deferred work after hitting the numeric limit, or operator follow-ups.
 - `agentAssessment.successful` + `confidence`, and `status`: `"completed"`.
+
+## Impact claims (`impact.items`)
+
+Prefer one item per concrete subject (package, issue, module). Allowed `category` values **exactly**: `dependency-update`, `bug-fix`, `bug-prevention`, `documentation`, `test-coverage`, `security`, `feature`, `performance`, `maintenance`. **Omit `impact` if unsure** — never invent categories (`code-quality`, `refactor`, etc.).
