@@ -43,5 +43,7 @@ build/
 .gojo/*
 !.gojo/agents/
 !.gojo/agents/**
+!.gojo/examples/
+!.gojo/examples/**
 !.gojo/instructions.md
 !.gojo/labels.md
