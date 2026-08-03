@@ -40,3 +40,12 @@ The PR title/body come from the handoff. Reviewers should not need the raw agent
 ## Impact claims (`impact.items`)
 
 Prefer one item per concrete subject (package, issue, module). Allowed `category` values **exactly**: `dependency-update`, `bug-fix`, `bug-prevention`, `documentation`, `test-coverage`, `security`, `feature`, `performance`, `maintenance`. **Omit `impact` if unsure** — never invent categories (`code-quality`, `refactor`, etc.).
+
+## Repair rounds (CI / reviewer feedback)
+
+When `subject.kind` is `pull-request` and `subject.feedback` is present (checks or review summary):
+
+- Treat the run as **repair-only** on the existing PR branch — do not open a new scope or invent unrelated work.
+- Read the PR body, `subject.feedback`, and `git log` / diff vs the target base.
+- Fix the cited CI or reviewer findings; keep the diff small.
+- Still write `.gojo/handoff.json`.
