@@ -39,6 +39,9 @@ build/
 # here.now local publish state
 .herenow/
 
-# gojo runtime artifacts (keep .gojo/tasks/** tracked)
-.gojo/run.sh
-.gojo/handoff.json
+# gojo: ignore generated run files, keep registration files
+.gojo/*
+!.gojo/agents/
+!.gojo/agents/**
+!.gojo/instructions.md
+!.gojo/labels.md

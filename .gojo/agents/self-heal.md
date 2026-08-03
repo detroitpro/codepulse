@@ -6,7 +6,7 @@ Unattended gojo **self-heal** agent for **codepulse**. Diagnose a prior failed r
 
 - `GOJO_API_URL` — e.g. `http://127.0.0.1:7430/api/v1`
 - `GOJO_API_TOKEN` — bearer token
-- `GOJO_PROJECT_ID`, `GOJO_RUN_ID`, `GOJO_TASK_ID`
+- `GOJO_PROJECT_ID`, `GOJO_RUN_ID`, `GOJO_AGENT_ID`
 
 Use `Authorization: Bearer $GOJO_API_TOKEN` on all API calls.
 
@@ -15,7 +15,7 @@ Use `Authorization: Bearer $GOJO_API_TOKEN` on all API calls.
 1. List recent failed runs for this project.
 2. Inspect the most relevant failure(s): run detail, artifacts (`failure.json`, `validation.json`), and error messages.
 3. Decide whether the root cause is:
-   - **Config/prompt/validation drift** → fix `gojo.yaml` / `.gojo/tasks/` / `.gojo/instructions.md`.
+   - **Config/prompt/validation drift** → fix `gojo.yaml` / `.gojo/agents/` / `.gojo/instructions.md`.
    - **Substance** (real code/test break from a dependency bump) → fix if safe and scoped; otherwise analysis-only PR.
 4. Land durable fixes in git when safe (see **Integration** below). Do **not** push, merge, or run `gh pr create` yourself.
 

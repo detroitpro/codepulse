@@ -1,23 +1,19 @@
 version: 1
-
 project:
   name: codepulse
   defaultBranch: main
-
 repository:
   remote: origin
   syncBeforeRun: true
   requireCleanBase: true
   submodules: false
   gitLfs: false
-
 instructions:
   files:
     - .gojo/instructions.md
   scheduledRunNotice: |
     Unattended scheduled gojo run. Prefer small diffs. Write .gojo/handoff.json before exiting.
-
-agents:
+profiles:
   shell:
     adapter: shell
     timeout: 5m
@@ -25,7 +21,6 @@ agents:
     adapter: cursor
     model: default
     timeout: 45m
-
 validationProfiles:
   repo-brief:
     steps:
@@ -39,7 +34,7 @@ validationProfiles:
         command: grep -q '^## Layout' docs/REPO_BRIEF.md
         timeout: 30s
       - name: enough-content
-        command: "wc -l docs/REPO_BRIEF.md | awk '$1 >= 20'"
+        command: wc -l docs/REPO_BRIEF.md | awk '$1 >= 20'
         timeout: 30s
   deps-rust:
     steps:
@@ -74,23 +69,20 @@ validationProfiles:
       - name: handoff-exists
         command: test -f .gojo/handoff.json
         timeout: 30s
-
-tasks:
+agents:
   repo-brief:
     description: Inventory the repo and write docs/REPO_BRIEF.md
-    agent: shell
-    promptFile: .gojo/tasks/repo-brief.sh
+    promptFile: .gojo/agents/repo-brief.sh
     validationProfile: repo-brief
     integration:
       mode: commit-only
       targetBranch: main
       requireAllValidations: true
       commitMessage: "gojo: add repository brief"
-
+    profile: shell
   deps-rust:
     description: Update Rust workspace dependencies and open a PR
-    agent: cursor
-    promptFile: .gojo/tasks/deps-rust.md
+    promptFile: .gojo/agents/deps-rust.md
     validationProfile: deps-rust
     concurrency:
       projectLimit: 1
@@ -98,19 +90,20 @@ tasks:
     integration:
       mode: pull-request
       targetBranch: main
+      approval: reviewer
+      fixRounds: 2
       requireAllValidations: true
     failurePolicy:
       maxAttemptsPerRun: 2
       disableAfterConsecutiveFailedRuns: 3
       backoff: exponential
     selfHeal:
-      task: self-heal
       afterConsecutiveFailedRuns: 1
-
+      agent: self-heal
+    profile: cursor
   deps-python:
     description: Update Python agent dependencies and open a PR
-    agent: cursor
-    promptFile: .gojo/tasks/deps-python.md
+    promptFile: .gojo/agents/deps-python.md
     validationProfile: deps-python
     concurrency:
       projectLimit: 1
@@ -118,19 +111,20 @@ tasks:
     integration:
       mode: pull-request
       targetBranch: main
+      approval: reviewer
+      fixRounds: 2
       requireAllValidations: true
     failurePolicy:
       maxAttemptsPerRun: 2
       disableAfterConsecutiveFailedRuns: 3
       backoff: exponential
     selfHeal:
-      task: self-heal
       afterConsecutiveFailedRuns: 1
-
+      agent: self-heal
+    profile: cursor
   deps-dotnet:
     description: Update .NET agent dependencies and open a PR
-    agent: cursor
-    promptFile: .gojo/tasks/deps-dotnet.md
+    promptFile: .gojo/agents/deps-dotnet.md
     validationProfile: deps-dotnet
     concurrency:
       projectLimit: 1
@@ -138,36 +132,38 @@ tasks:
     integration:
       mode: pull-request
       targetBranch: main
+      approval: reviewer
+      fixRounds: 2
       requireAllValidations: true
     failurePolicy:
       maxAttemptsPerRun: 2
       disableAfterConsecutiveFailedRuns: 3
       backoff: exponential
     selfHeal:
-      task: self-heal
       afterConsecutiveFailedRuns: 1
-
+      agent: self-heal
+    profile: cursor
   deps-pr-babysit:
-    description: Babysit and merge open gojo dependency PRs
-    agent: cursor
-    promptFile: .gojo/tasks/deps-pr-babysit.md
-    validationProfile: deps-babysit
+    description: Independently review dependency PRs after source checks settle
+    promptFile: .gojo/agents/deps-pr-babysit.md
+    validationProfile: handoff
+    trigger:
+      on: pull-request-checks-settled
+      fromAgents:
+        - deps-rust
+        - deps-python
+        - deps-dotnet
     concurrency:
       projectLimit: 1
       overlapPolicy: skip
-    integration:
-      mode: commit-only
-      targetBranch: main
-      requireAllValidations: true
     failurePolicy:
       maxAttemptsPerRun: 1
       disableAfterConsecutiveFailedRuns: 5
       backoff: exponential
-
+    profile: cursor
   self-heal:
     description: Diagnose failed gojo runs and report durable fixes in handoff
-    agent: cursor
-    promptFile: .gojo/tasks/self-heal.md
+    promptFile: .gojo/agents/self-heal.md
     validationProfile: self-heal
     concurrency:
       projectLimit: 1
@@ -176,11 +172,10 @@ tasks:
       maxAttemptsPerRun: 1
       disableAfterConsecutiveFailedRuns: 5
       backoff: none
-
+    profile: cursor
   activity-digest:
     description: Daily executive brief on what shipped in the last 24h and why it matters
-    agent: cursor
-    promptFile: .gojo/tasks/activity-digest.md
+    promptFile: .gojo/agents/activity-digest.md
     validationProfile: handoff
     concurrency:
       projectLimit: 1
@@ -194,33 +189,26 @@ tasks:
         - ghost
       onFailure:
         - ghost
-
+    profile: cursor
 schedules:
   deps-rust:
-    task: deps-rust
-    cron: "0 3 * * 5"
+    cron: 0 3 * * 5
     timezone: America/Detroit
+    agent: deps-rust
   deps-python:
-    task: deps-python
-    cron: "0 3 * * 6"
+    cron: 0 3 * * 6
     timezone: America/Detroit
+    agent: deps-python
   deps-dotnet:
-    task: deps-dotnet
-    cron: "0 3 * * 0"
+    cron: 0 3 * * 0
     timezone: America/Detroit
-  deps-pr-babysit:
-    task: deps-pr-babysit
-    cron: "0 6 * * *"
-    timezone: America/Detroit
+    agent: deps-dotnet
   self-heal:
-    task: self-heal
-    cron: "30 6 * * *"
+    cron: 30 6 * * *
     timezone: America/Detroit
+    agent: self-heal
   activity-digest:
-    task: activity-digest
-    cron: "0 8 * * *"
+    cron: 0 8 * * *
     timezone: America/Detroit
-
-# Project-wide routing stays empty on purpose: only activity-digest notifies,
-# via its own task-level notifications block.
+    agent: activity-digest
 notifications: {}
