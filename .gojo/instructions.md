@@ -37,6 +37,10 @@ The PR title/body come from the handoff. Reviewers should not need the raw agent
 - `unresolvedIssues` / `recommendedNextActions` — deferred work after hitting the numeric limit, or operator follow-ups.
 - `agentAssessment.successful` + `confidence`, and `status`: `"completed"`.
 
+## Validation
+
+Validation steps are your definition of done — run them and fix failures before writing the handoff.
+
 ## Impact claims (`impact.items`)
 
 Prefer one item per concrete subject (package, issue, module). Allowed `category` values **exactly**: `dependency-update`, `bug-fix`, `bug-prevention`, `documentation`, `test-coverage`, `security`, `feature`, `performance`, `maintenance`. **Omit `impact` if unsure** — never invent categories (`code-quality`, `refactor`, etc.).
