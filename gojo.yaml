@@ -38,22 +38,36 @@ validationProfiles:
         timeout: 30s
   deps-rust:
     steps:
-      - name: cargo-test
-        command: cargo test --workspace
+      - name: verify-rust
+        command: bash scripts/verify-rust.sh
         timeout: 20m
+      - name: handoff-exists
+        command: test -f .gojo/handoff.json
+        timeout: 30s
   deps-python:
     steps:
-      - name: pip-install
-        command: python3 -m venv .codepulse/gojo-venv && .codepulse/gojo-venv/bin/pip install -U pip && .codepulse/gojo-venv/bin/pip install -e "agents/python[dev]"
-        timeout: 10m
-      - name: import-smoke
-        command: .codepulse/gojo-venv/bin/python -c "from codepulse_agent import install; print('ok')"
-        timeout: 2m
+      - name: verify-python
+        command: VENV_DIR=.codepulse/gojo-venv bash scripts/verify-python.sh
+        timeout: 15m
+      - name: handoff-exists
+        command: test -f .gojo/handoff.json
+        timeout: 30s
   deps-dotnet:
     steps:
-      - name: dotnet-test
-        command: dotnet test -c Release agents/dotnet/CodePulse.Agent.Tests/CodePulse.Agent.Tests.csproj
+      - name: verify-dotnet
+        command: bash scripts/verify-dotnet.sh
         timeout: 15m
+      - name: handoff-exists
+        command: test -f .gojo/handoff.json
+        timeout: 30s
+  deps-mcp:
+    steps:
+      - name: verify-mcp
+        command: bash scripts/verify-mcp.sh
+        timeout: 10m
+      - name: handoff-exists
+        command: test -f .gojo/handoff.json
+        timeout: 30s
   deps-babysit:
     steps:
       - name: noop
