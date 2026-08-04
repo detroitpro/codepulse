@@ -2,6 +2,7 @@ version: 1
 project:
   name: codepulse
   defaultBranch: main
+  enabled: false
 repository:
   remote: origin
   syncBeforeRun: true
